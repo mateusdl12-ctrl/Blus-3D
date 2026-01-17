@@ -74,7 +74,7 @@ export default function Home() {
     }
 
     const custoHora = 2.0;
-    const margem = 1.5;
+    const margem = 2;
     const precoKg = 100.0;
     const custo = custoHora * tempoHoras + precoKg * (pesoTotal / 1000);
     const preco = custo * margem;
