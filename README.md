@@ -64,3 +64,4 @@ docker run -p 3000:3000 blus-3d
 ## Deploy
 
 Suba o repositorio no GitHub e importe no Vercel.
+verificar
