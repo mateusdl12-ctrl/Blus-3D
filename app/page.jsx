@@ -3,21 +3,63 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [file, setFile] = useState(null);
-  const [email, setEmail] = useState("");
-  const [material, setMaterial] = useState("PLA");
-  const [color, setColor] = useState("");
-  const [infill, setInfill] = useState(20);
+  const [form, setForm] = useState({
+    nome: "",
+    whatsapp: "",
+    cep: "",
+    numero: "",
+    logradouro: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+    complemento: "",
+    nomePeca: "",
+    tempo: "",
+    peso: "",
+    link: "",
+    cor: "",
+  });
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+
+  function update(field) {
+    return (e) =>
+      setForm((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
-    const materialMultiplier =
-      material === "PETG" ? 1.2 : material === "ABS" ? 1.3 : 1.0;
-    const infillFactor = Math.min(Math.max(infill, 0), 100) / 100;
-    const base = 25;
-    const estimate = (base + base * infillFactor) * materialMultiplier;
-    setResult(estimate);
+    setError("");
+
+    const tempoHoras = Number.parseFloat(form.tempo);
+    const pesoTotal = Number.parseFloat(form.peso);
+
+    if (!form.nome || !form.whatsapp) {
+      setResult(null);
+      setError("Preencha seu nome e WhatsApp para continuar.");
+      return;
+    }
+
+    if (!tempoHoras || !pesoTotal) {
+      setResult(null);
+      setError("Informe o tempo de impressao e o peso total da peca.");
+      return;
+    }
+
+    const custoHora = 2.0;
+    const margem = 1.5;
+    const precoKg = 100.0;
+    const custo = custoHora * tempoHoras + precoKg * (pesoTotal / 1000);
+    const preco = custo * margem;
+
+    setResult({
+      preco,
+      tempoHoras,
+      pesoTotal,
+    });
   }
 
   return (
@@ -30,15 +72,29 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
             <section className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 shadow-sm">
-                Orcamento rapido
+                Simulador de orcamento
               </div>
               <h1 className="font-display text-4xl font-semibold leading-tight text-stone-900 md:text-5xl">
-                Orcamento de Impressao 3D feito para projetos exigentes
+                Simule seu orcamento 3D em minutos, do jeito certo
               </h1>
               <p className="text-lg text-stone-700">
-                Envie seu arquivo, escolha o material e receba uma estimativa
-                imediata. Sem complicacao, com foco em qualidade.
+                Preencha os dados e receba uma estimativa clara para a sua
+                impressao. Ajuste o tempo, o peso e a cor desejada.
               </p>
+
+              <div className="rounded-2xl border border-emerald-200 bg-white/80 p-4 shadow-sm">
+                <div className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Quer um modelo pronto?
+                </div>
+                <a
+                  className="mt-2 inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200/70 transition hover:-translate-y-0.5"
+                  href="https://makerworld.com/pt"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Explorar modelos no MakerWorld
+                </a>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-stone-200 bg-white/80 p-4 shadow-sm">
@@ -62,83 +118,213 @@ export default function Home() {
 
             <section className="rounded-3xl border border-stone-200 bg-white/80 p-6 shadow-lg backdrop-blur">
               <h2 className="font-display text-2xl font-semibold text-stone-900">
-                Seu arquivo e preferencias
+                Dados para o orcamento
               </h2>
               <p className="mt-1 text-sm text-stone-600">
-                Preencha os detalhes abaixo para calcular a estimativa.
+                Informe os detalhes abaixo para gerar a estimativa.
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-stone-700">
-                    Arquivo 3D (STL, OBJ, 3MF)
-                  </label>
-                  <input
-                    className="block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-700"
-                    type="file"
-                    accept=".stl,.obj,.3mf"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  />
-                  {file ? (
-                    <div className="text-xs text-stone-500">{file.name}</div>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-stone-700">
-                    Email
+                    Seu nome*
                   </label>
                   <input
                     className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Nome completo"
+                    value={form.nome}
+                    onChange={update("nome")}
                   />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-stone-700">
-                      Material
-                    </label>
-                    <select
-                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                      value={material}
-                      onChange={(e) => setMaterial(e.target.value)}
-                    >
-                      <option>PLA</option>
-                      <option>PETG</option>
-                      <option>ABS</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-stone-700">
-                      Cor do filamento
+                      WhatsApp*
                     </label>
                     <input
                       className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                       type="text"
-                      placeholder="Ex: Preto"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
+                      placeholder="Somente numeros"
+                      value={form.whatsapp}
+                      onChange={update("whatsapp")}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      CEP*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="00000000"
+                      value={form.cep}
+                      onChange={update("cep")}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-stone-700">
-                    Infill (%)
-                  </label>
-                  <input
-                    className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={infill}
-                    onChange={(e) => setInfill(Number(e.target.value))}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Numero*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="Ex: 123"
+                      value={form.numero}
+                      onChange={update("numero")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Complemento (opcional)
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="Apto, bloco, sala"
+                      value={form.complemento}
+                      onChange={update("complemento")}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Rua*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      value={form.logradouro}
+                      onChange={update("logradouro")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Bairro*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      value={form.bairro}
+                      onChange={update("bairro")}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Cidade*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      value={form.cidade}
+                      onChange={update("cidade")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Estado*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="UF"
+                      value={form.estado}
+                      onChange={update("estado")}
+                    />
+                  </div>
+                </div>
+
+                <details className="rounded-2xl border border-stone-200 bg-white/80 p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-stone-800">
+                    Como obter tempo e peso no MakerWorld?
+                  </summary>
+                  <p className="mt-2 text-sm text-stone-600">
+                    Abra o modelo no MakerWorld, clique no perfil de impressao e
+                    veja o tempo e o peso total da peca.
+                  </p>
+                  <img
+                    className="mt-3 w-full rounded-xl border border-stone-200"
+                    src="/images/tuto.png"
+                    alt="Exemplo de onde encontrar tempo e peso no MakerWorld"
                   />
+                </details>
+
+                <div className="grid gap-4 sm:grid-cols-[1.2fr_0.8fr_0.8fr]">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Nome da peca (opcional)
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="Ex: Suporte de celular"
+                      value={form.nomePeca}
+                      onChange={update("nomePeca")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Tempo (h)*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="number"
+                      min={0}
+                      step="0.1"
+                      value={form.tempo}
+                      onChange={update("tempo")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Peso total (g)*
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={form.peso}
+                      onChange={update("peso")}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Link do arquivo de impressao
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="url"
+                      placeholder="https://makerworld.com"
+                      value={form.link}
+                      onChange={update("link")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Cor desejada (opcional)
+                    </label>
+                    <input
+                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                      type="text"
+                      placeholder="Ex: Preto, branco, translucido"
+                      value={form.cor}
+                      onChange={update("cor")}
+                    />
+                  </div>
                 </div>
 
                 <button
@@ -149,14 +335,44 @@ export default function Home() {
                 </button>
               </form>
 
+              {error ? (
+                <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900">
+                  {error}
+                </div>
+              ) : null}
+
               {result !== null && (
                 <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
                   <h3 className="font-display text-lg font-semibold text-emerald-900">
-                    Resultado
+                    Resumo do orcamento
                   </h3>
-                  <p className="mt-2 text-sm text-emerald-900">
-                    <strong>Valor estimado:</strong> R$ {result.toFixed(2)}
-                  </p>
+                  <div className="mt-3 grid gap-2 text-sm text-emerald-900">
+                    <div>
+                      <strong>Nome:</strong> {form.nome}
+                    </div>
+                    <div>
+                      <strong>WhatsApp:</strong> {form.whatsapp}
+                    </div>
+                    <div>
+                      <strong>Peca:</strong> {form.nomePeca || "-"}
+                    </div>
+                    <div>
+                      <strong>Tempo:</strong> {result.tempoHoras} horas
+                    </div>
+                    <div>
+                      <strong>Peso:</strong> {result.pesoTotal} g
+                    </div>
+                    <div>
+                      <strong>Cor:</strong> {form.cor || "-"}
+                    </div>
+                    <div className="text-base font-semibold">
+                      Valor estimado:{" "}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(result.preco)}
+                    </div>
+                  </div>
                   <p className="mt-2 text-xs text-emerald-800/80">
                     * Valor estimado. O preco final pode variar apos analise.
                   </p>
