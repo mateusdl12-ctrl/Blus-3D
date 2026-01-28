@@ -21,7 +21,7 @@ export default function Home() {
   });
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
-  const whatsappNumber = "5541995165778";
+  const whatsappNumber = "5541995702837";
   const storageKey = "blus3d_orcamento";
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
 
@@ -73,8 +73,8 @@ export default function Home() {
       return;
     }
 
-    const custoHora = 4.0;
-    const margem = 2.2;
+    const custoHora = 3.0;
+    const margem = 2.0;
     const precoKg = 100.0;
     const custo = custoHora * tempoHoras + precoKg * (pesoTotal / 1000);
     const preco = custo * margem;
@@ -177,10 +177,17 @@ export default function Home() {
                 </div>
                 <div className="rounded-2xl border border-stone-200 bg-white/80 p-4 shadow-sm">
                   <div className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                    Materiais
+                    Materiais Disponíveis
                   </div>
-                  <div className="mt-2 text-2xl font-semibold text-stone-900">
-                    PLA, PETG
+                  <div className="mt-2 text-sm text-stone-700 space-y-2">
+                    <div>
+                      <span className="font-bold text-stone-900">PLA: </span>
+                      Preto, Branco, Marrom, Cinza, Vermelho, Verde, Azul
+                    </div>
+                    <div>
+                      <span className="font-bold text-stone-900">PETG: </span>
+                      Preto, Branco
+                    </div>
                   </div>
                 </div>
               </div>

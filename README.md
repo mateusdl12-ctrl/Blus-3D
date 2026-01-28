@@ -20,7 +20,7 @@ Landing page e formulario de orcamento para impressao 3D, com resumo do pedido e
 - `next.config.js`: configuracao do Next.js.
 - `tailwind.config.js` e `postcss.config.js`: configuracao do Tailwind e PostCSS.
 - `Dockerfile` e `.dockerignore`: build e runtime com Docker.
-- `package.json`: scripts e dependencias
+- `package.json`: scripts e dependencias.
 
 ## Como usar
 
